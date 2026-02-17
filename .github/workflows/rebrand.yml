@@ -1,0 +1,64 @@
+name: White Label Build
+on:
+  repository_dispatch:
+    types: [rebrand_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Setup AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-east-1
+
+      # 1. Download the specific brand assets
+      - name: Sync Brand Assets
+        run: |
+          mkdir -p branding_assets
+          aws s3 cp s3://${{ secrets.S3_BUCKET }}/brands/${{ github.event.client_payload.client_id }}/logo.png branding_assets/logo.png
+
+      # 2. Prepare the environment
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 2.1 Install Rebrand CLI Dependencies
+      - name: Install Rebrand CLI Dependencies
+        run: |
+          cd rebrand_cli
+          dart pub get
+
+      # 3. Run the Rebrand CLI (Modifies code + generates icons)
+      - name: Run Rebrand CLI
+        run: |
+          dart rebrand_cli/bin/rebrand.dart \
+            --name "${{ github.event.client_payload.app_name }}" \
+            --bundle-id "${{ github.event.client_payload.bundle_id }}" \
+            --asset-dir "branding_assets"
+
+      # 4. Build the App
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      # 5. Upload the resulting APK to GitHub Actions summary
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.client_payload.client_id }}-build
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      # 6. CLEANUP (The missing piece)
+      # This deletes the logo from S3 immediately after the build finishes
+      - name: Cleanup S3 Assets
+        if: always() 
+        run: |
+          aws s3 rm s3://${{ secrets.S3_BUCKET }}/brands/${{ github.event.client_payload.client_id }} --recursive
