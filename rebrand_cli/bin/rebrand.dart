@@ -107,8 +107,8 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "$logoPath"
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "$logoPath"
+  remove_alpha_ios: true
+  min_sdk_android: 21
 ''');
 
   final result = await Process.run('dart', [
