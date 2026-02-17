@@ -100,6 +100,10 @@ Future<void> _updateIOSDisplayName(String appName) async {
 }
 
 Future<void> _generateIcons(String assetDir) async {
+  // Clean up old icons before generating new ones
+  print('🧹 Removing old icons...');
+  await _cleanupOldIcons();
+
   final logoPath = '$assetDir/logo.png';
   final configFile = File('rebrand_launcher_icons.yaml');
   await configFile.writeAsString('''
@@ -207,4 +211,32 @@ Future<void> _updateAndroidPackage(String newBundleId) async {
   await newFile.writeAsString(newContent);
 
   print('📦 Moved MainActivity to $newPackagePath');
+}
+
+Future<void> _cleanupOldIcons() async {
+  // Clean Android mipmap directories
+  final androidResDir = Directory('android/app/src/main/res');
+  if (await androidResDir.exists()) {
+    await for (final entity in androidResDir.list()) {
+      if (entity is Directory && entity.path.contains('mipmap-')) {
+        final mipmapDir = Directory(entity.path);
+        // Delete launcher_icon files but keep the directory structure
+        await for (final file in mipmapDir.list()) {
+          if (file is File && file.path.contains('launcher_icon')) {
+            await file.delete();
+          }
+        }
+      }
+    }
+  }
+
+  // Clean iOS AppIcon files
+  final iosIconDir = Directory('ios/Runner/Assets.xcassets/AppIcon.appiconset');
+  if (await iosIconDir.exists()) {
+    await for (final file in iosIconDir.list()) {
+      if (file is File && file.path.endsWith('.png')) {
+        await file.delete();
+      }
+    }
+  }
 }

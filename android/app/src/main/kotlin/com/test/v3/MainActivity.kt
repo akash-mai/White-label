@@ -1,4 +1,4 @@
-package com.white.label
+package com.test.v3
 
 import io.flutter.embedding.android.FlutterActivity
 
