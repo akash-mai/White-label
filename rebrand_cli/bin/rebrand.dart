@@ -124,7 +124,7 @@ flutter_launcher_icons:
 }
 
 Future<void> _generateSplash(String assetDir) async {
-  final logoPath = '$assetDir/splash.png';
+  final logoPath = '$assetDir/logo.png';
   final configFile = File('rebrand_native_splash.yaml');
   await configFile.writeAsString('''
 flutter_native_splash:
