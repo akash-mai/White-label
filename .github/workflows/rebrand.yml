@@ -26,6 +26,7 @@ jobs:
         run: |
           mkdir -p branding_assets
           aws s3 cp s3://${{ secrets.S3_BUCKET }}/brands/${{ github.event.client_payload.client_id }}/logo.png branding_assets/logo.png
+          aws s3 cp s3://${{ secrets.S3_BUCKET }}/brands/${{ github.event.client_payload.client_id }}/splash.png branding_assets/splash.png
 
       # 2. Prepare the environment
       - name: Install Dependencies
