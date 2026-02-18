@@ -153,7 +153,16 @@ jobs:
           name: ${{ github.event.client_payload.client_id }}-ipa
           path: build/ios/ipa/*.ipa
 
-      # ── 7. Cleanup S3 Assets ──────────────────────────────────────────────
+      # # ── 7. Notify Web App ───────────────────────────────────────────────
+      # - name: Notify Web App
+      #   if: always()
+      #   run: |
+      #     status="${{ job.status }}"
+      #     curl -X POST https://your-node-api.com/api/webhook/build-status \
+      #     -H "Content-Type: application/json" \
+      #     -d "{\"buildId\": \"${{ github.event.client_payload.client_id }}\", \"status\": \"$status\"}"
+
+      # ── 8. Cleanup S3 Assets ──────────────────────────────────────────────
       # NOTE: The keystore (upload-keystore.jks) is intentionally kept in S3
       # so it can be reused for future app updates (same signing identity).
       - name: Cleanup S3 Assets
