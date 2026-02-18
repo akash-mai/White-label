@@ -77,6 +77,7 @@ jobs:
         run: gem install fastlane
 
       - name: Fastlane - Create App ID & Sync Certs
+        if: ${{ github.event.client_payload.apple_team_id != '' }}
         env:
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
