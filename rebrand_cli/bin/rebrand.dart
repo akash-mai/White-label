@@ -91,42 +91,6 @@ storeFile=${File(keystorePath).absolute.path}
       // Ensure build.gradle.kts references key.properties for release signing
       // await _ensureAndroidSigningConfig(gradleFile.path, keyAlias);
       print('✅ Android signing properties generated.');
-      print('''
-\n⚠️  MANUAL ACTION REQUIRED: Update your android/app/build.gradle (or .kts)
- Add this before `android { ... }`:
-
- // For build.gradle (Groovy):
- def keystoreProperties = new Properties()
- def keystorePropertiesFile = rootProject.file('app/key.properties')
- if (keystorePropertiesFile.exists()) {
-     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
- }
-
- // For build.gradle.kts (Kotlin):
- val keystoreProperties = java.util.Properties()
- val keystorePropertiesFile = rootProject.file("app/key.properties")
- if (keystorePropertiesFile.exists()) {
-     keystoreProperties.load(java.io.FileInputStream(keystorePropertiesFile))
- }
-
- Then inside `android { ... }`:
-
- signingConfigs {
-     create("release") {
-         storeFile = file(keystoreProperties["storeFile"] as String)
-         storePassword = keystoreProperties["storePassword"] as String
-         keyAlias = keystoreProperties["keyAlias"] as String
-         keyPassword = keystoreProperties["keyPassword"] as String
-     }
- }
- // ...
- buildTypes {
-     release {
-         signingConfig signingConfigs.getByName("release")
-         // ...
-     }
- }
-''');
     } else {
       print('⚠️  No keystore provided — APK will be unsigned (debug mode).');
     }
